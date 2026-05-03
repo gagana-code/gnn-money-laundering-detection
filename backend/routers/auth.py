@@ -52,7 +52,7 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == user.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
-    hashed = pwd_context.hash(user.password)
+    hashed = pwd_context.hash(user.password[:72])
     new_user = User(name=user.name, email=user.email, password=hashed)
     db.add(new_user)
     db.commit()
