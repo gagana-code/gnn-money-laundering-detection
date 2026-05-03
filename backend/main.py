@@ -1,16 +1,18 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from routers import auth, transactions, upload, alerts, graph, dashboard
 import uvicorn
 
 app = FastAPI(title="AML Detection System", version="1.0.0")
 
-origins = [
-    "https://aml-shield-smoky.vercel.app",
-    "https://aml-shield.vercel.app",
-    "http://localhost:3000",
-    "*"
-]
+@app.middleware("http")
+async def add_cors_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
 
 app.add_middleware(
     CORSMiddleware,
