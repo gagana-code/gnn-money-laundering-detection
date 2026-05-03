@@ -5,10 +5,17 @@ import uvicorn
 
 app = FastAPI(title="AML Detection System", version="1.0.0")
 
+origins = [
+    "https://aml-shield-smoky.vercel.app",
+    "https://aml-shield.vercel.app",
+    "http://localhost:3000",
+    "*"
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
