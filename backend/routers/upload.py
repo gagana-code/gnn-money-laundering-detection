@@ -10,7 +10,6 @@ from ml.gnn_service import score_transactions
 from routers.auth import get_current_user
 
 router = APIRouter()
-
 REQUIRED_COLUMNS = ["sender", "receiver", "amount"]
 
 @router.post("/")
@@ -21,7 +20,6 @@ async def upload_file(
 ):
     if not file.filename.endswith((".csv", ".xlsx", ".xls")):
         raise HTTPException(status_code=400, detail="Only CSV and Excel files are supported")
-    
     content = await file.read()
     try:
         if file.filename.endswith(".csv"):
@@ -30,13 +28,17 @@ async def upload_file(
             df = pd.read_excel(io.BytesIO(content))
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to parse file: {str(e)}")
-    
+
     df.columns = [c.lower().strip().replace(" ", "_") for c in df.columns]
-    
     missing = [c for c in REQUIRED_COLUMNS if c not in df.columns]
     if missing:
         raise HTTPException(status_code=400, detail=f"Missing required columns: {missing}. Required: {REQUIRED_COLUMNS}")
-    
+
+    # CLEAR ALL PREVIOUS DATA BEFORE NEW UPLOAD
+    db.query(Alert).delete()
+    db.query(Transaction).delete()
+    db.commit()
+
     batch_id = str(uuid.uuid4())[:8]
     transactions = []
     for _, row in df.iterrows():
@@ -48,23 +50,18 @@ async def upload_file(
             "timestamp": str(row.get("timestamp", datetime.utcnow())),
         }
         transactions.append(tx)
-    
+
     scored = score_transactions(transactions)
-    
     saved_count = 0
     alert_count = 0
-    
+
     for tx in scored:
-        existing = db.query(Transaction).filter(Transaction.transaction_id == tx["transaction_id"]).first()
-        if existing:
-            continue
-        
         ts = None
         try:
             ts = pd.to_datetime(tx.get("timestamp"))
         except:
             ts = datetime.utcnow()
-        
+
         db_tx = Transaction(
             transaction_id=tx["transaction_id"],
             sender=tx["sender"],
@@ -77,12 +74,12 @@ async def upload_file(
         )
         db.add(db_tx)
         saved_count += 1
-        
+
         if tx["status"] == "Suspicious":
             alert = Alert(
                 alert_id=str(uuid.uuid4())[:12],
                 transaction_id=tx["transaction_id"],
-                entity=f"{tx['sender']} → {tx['receiver']}",
+                entity=f"{tx['sender']} -> {tx['receiver']}",
                 risk_score=tx["risk_score"],
                 risk_level="Critical" if tx["risk_score"] >= 0.75 else "High" if tx["risk_score"] >= 0.5 else "Medium",
                 reason=", ".join(tx.get("reasons", ["suspicious_pattern"])) or "suspicious_pattern",
@@ -90,9 +87,8 @@ async def upload_file(
             )
             db.add(alert)
             alert_count += 1
-    
+
     db.commit()
-    
     return {
         "message": "File processed successfully",
         "total_transactions": len(scored),
