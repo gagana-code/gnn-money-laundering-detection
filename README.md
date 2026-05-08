@@ -4,7 +4,7 @@ A full-stack web platform that uses **Graph Neural Networks (GNN)** to detect su
 
 ---
 
-## 🏗️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
@@ -16,36 +16,36 @@ A full-stack web platform that uses **Graph Neural Networks (GNN)** to detect su
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 aml-system/
 ├── backend/
-│   ├── main.py                  # FastAPI app entry point
+│   ├── main.py                  
 │   ├── requirements.txt
-│   ├── render.yaml              # Render deployment config
+│   ├── render.yaml       #Backend Deployment      
 │   ├── models/
-│   │   └── database.py          # SQLAlchemy models
+│   │   └── database.py          
 │   ├── routers/
-│   │   ├── auth.py              # Signup/Login/JWT
-│   │   ├── upload.py            # File upload + GNN pipeline
-│   │   ├── transactions.py      # Transaction CRUD
-│   │   ├── alerts.py            # Alert management
-│   │   ├── graph.py             # Graph data for visualization
-│   │   └── dashboard.py        # Stats & summary
+│   │   ├── auth.py              
+│   │   ├── upload.py           
+│   │   ├── transactions.py    
+│   │   ├── alerts.py           
+│   │   ├── graph.py             
+│   │   └── dashboard.py       
 │   └── ml/
-│       └── gnn_service.py       # GNN/graph analysis engine
+│       └── gnn_service.py     
 ├── frontend/
 │   ├── package.json
-│   ├── vercel.json              # Vercel deployment config
+│   ├── vercel.json  #Frontend Deployment            
 │   ├── .env.example
 │   └── src/
-│       ├── App.jsx              # Routes
+│       ├── App.jsx           
 │       ├── index.js
 │       ├── context/
 │       │   └── AuthContext.jsx
 │       ├── utils/
-│       │   └── api.js           # Axios instance
+│       │   └── api.js           
 │       ├── components/Layout/
 │       │   └── Sidebar.jsx
 │       └── pages/
@@ -57,12 +57,12 @@ aml-system/
 │           ├── Alerts.jsx
 │           ├── NetworkGraph.jsx
 │           └── Profile.jsx
-└── sample_transactions.csv      # Test data
+└── sample_transactions.csv    
 ```
 
 ---
 
-## 🚀 LOCAL SETUP
+## LOCAL SETUP
 
 ### Step 1: Clone / Setup
 
@@ -114,7 +114,7 @@ npm start
 
 ---
 
-## ☁️ DEPLOYMENT GUIDE
+## DEPLOYMENT GUIDE
 
 ---
 
@@ -175,89 +175,12 @@ DATABASE_URL = sqlite:///./aml.db
 
 Click **Create Web Service** → Wait 2-3 minutes
 
-✅ Your backend will be at: `https://aml-shield-backend.onrender.com`
+Backend will be at: `https://aml-shield-backend.onrender.com`
 
 **Copy this URL** — you'll need it for the frontend.
 
 ---
 
-### PART 3: Deploy Frontend on Vercel
-
-#### Step 1: Sign up at Vercel
-Go to https://vercel.com → Sign up with GitHub
-
-#### Step 2: Import Project
-
-1. Click **Add New** → **Project**
-2. Select your `aml-shield` GitHub repo
-3. Configure:
-   - **Framework Preset**: Create React App
-   - **Root Directory**: `frontend`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `build`
-
-#### Step 3: Add Environment Variable
-
-In **Environment Variables** section:
-```
-REACT_APP_API_URL = https://aml-shield-backend.onrender.com
-```
-(Use your actual Render backend URL)
-
-#### Step 4: Deploy
-
-Click **Deploy** → Wait 1-2 minutes
-
-✅ Your frontend will be at: `https://aml-shield.vercel.app`
-
----
-
-### PART 4: Add Custom Domain (Optional)
-
-#### On Vercel (Frontend):
-
-1. Go to your project → **Settings** → **Domains**
-2. Click **Add Domain**
-3. Enter your domain: `aml.yourdomain.com`
-4. Vercel will show DNS records to add
-
-#### At Your Domain Registrar (GoDaddy / Namecheap / Google Domains):
-
-Add a **CNAME** record:
-```
-Type:  CNAME
-Name:  aml          (or @ for root domain)
-Value: cname.vercel-dns.com
-TTL:   Automatic
-```
-
-Or if using root domain, add **A records**:
-```
-Type: A
-Name: @
-Value: 76.76.21.21
-```
-
-5. Back in Vercel → Click **Verify** → Wait 5-30 minutes for DNS propagation
-6. SSL certificate is automatically provisioned ✅
-
-#### On Render (Backend):
-
-1. Go to your service → **Settings** → **Custom Domains**
-2. Add `api.yourdomain.com`
-3. Add CNAME at your registrar:
-```
-Type:  CNAME
-Name:  api
-Value: aml-shield-backend.onrender.com
-```
-
-Then update your Vercel env variable:
-```
-REACT_APP_API_URL = https://api.yourdomain.com
-```
-
----
 
 ## 🧪 CSV FORMAT FOR TESTING
 
@@ -286,11 +209,3 @@ Optional: `transaction_id`, `timestamp`
 5. **Auto-Alert**: Any transaction with risk ≥ 0.5 generates an alert
 
 ---
-
-## 🔒 Production Checklist
-
-- [ ] Change `SECRET_KEY` to a strong random string
-- [ ] Switch from SQLite to PostgreSQL (add DATABASE_URL to Render)
-- [ ] Set `allow_origins` in CORS to your actual frontend URL
-- [ ] Enable HTTPS (automatic on Vercel/Render)
-- [ ] Add rate limiting for auth endpoints
