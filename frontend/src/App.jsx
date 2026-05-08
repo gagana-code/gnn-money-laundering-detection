@@ -1,5 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
+import Layout from "./components/Layout/Sidebar";
+
+import Dashboard from "./pages/Dashboard";
+import Upload from "./pages/Upload";
+import Transactions from "./pages/Transactions";
+import Alerts from "./pages/Alerts";
+import NetworkGraph from "./pages/NetworkGraph";
+import Profile from "./pages/Profile";
+
 function AppLayout({ children }) {
   return <Layout>{children}</Layout>;
 }
